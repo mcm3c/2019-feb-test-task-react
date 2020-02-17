@@ -1,26 +1,23 @@
+import * as React from 'react';
+import { Link } from 'react-router-dom';
 
 interface JobsListProps {
 }
 
 interface JobsListState {
-  test: boolean;
 }
 
-class JobsList extends React.Component<JobsListProps, JobsListState> {
+export class JobsList extends React.Component<JobsListProps, JobsListState> {
   constructor(props: JobsListProps) {
     super(props);
-    this.state = { test: false };
   }
 
   render() {
-    if (this.state.test) {
-      return 'test!';
-    }
 
     return (
-      <button onClick={() => this.setState({ test: true })}>
-        Wow, trivial app?
-      </button>
+      <div>
+        here should be a list of jobs. <Link to="/jobs/123">Go to single job.</Link> <Link to="/somewhere">Go to error page.</Link>
+      </div>
     );
   }
 }

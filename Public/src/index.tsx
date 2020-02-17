@@ -1,8 +1,19 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { HashRouter as Router, Route, Link, Switch } from 'react-router-dom'
+import { History } from 'history';
+import { ConnectedRouter } from 'connected-react-router';
+import { Provider } from 'react-redux';
+import { configureStore } from 'store';
+import { Store } from 'redux';
+import RootState from 'store/RootState';
+import { history } from 'reducers';
+import { Switch, Route, Redirect } from 'react-router';
+import { JobsList } from 'components/jobs-list/jobs';
+import { Job } from 'components/job/job';
+import { NotFound } from 'components/not-found/not-found';
 
 interface AppProps {
+  history: History;
 }
 
 interface AppState {
@@ -10,9 +21,12 @@ interface AppState {
 }
 
 export class App extends React.Component<AppProps, AppState> {
+  private store: Store<RootState>;
+
   constructor(props: AppProps) {
     super(props);
     this.state = { test: false };
+    this.store = configureStore();
   }
 
   render() {
@@ -22,9 +36,20 @@ export class App extends React.Component<AppProps, AppState> {
     console.log(123);
 
     return (
-      <button onClick={() => this.setState({ test: true })}>
-        Wow, trivial app?!
-      </button>
+      <Provider store={this.store}>
+        <ConnectedRouter history={history}>
+          <>
+            <Switch>
+              <Route path="/" exact>
+                <Redirect to="/jobs"></Redirect>
+              </Route>
+              <Route path="/jobs" exact component={JobsList} />
+              <Route path="/jobs/:id" component={Job} />
+              <Route component={NotFound} />
+            </Switch>
+          </>
+        </ConnectedRouter>
+      </Provider>
     );
   }
 }
