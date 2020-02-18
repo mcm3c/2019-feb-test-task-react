@@ -8,8 +8,8 @@ import { Store } from 'redux';
 import RootState from 'store/RootState';
 import { history } from 'reducers';
 import { Switch, Route, Redirect } from 'react-router';
-import { JobsList } from 'components/jobs-list/jobs';
-import { Job } from 'components/job/job';
+import JobsList from 'components/jobs-list/jobs';
+import JobComponent from 'components/job/job';
 import { NotFound } from 'components/not-found/not-found';
 
 interface AppProps {
@@ -44,7 +44,7 @@ export class App extends React.Component<AppProps, AppState> {
                 <Redirect to="/jobs"></Redirect>
               </Route>
               <Route path="/jobs" exact component={JobsList} />
-              <Route path="/jobs/:id" component={Job} />
+              <Route path="/jobs/:id" component={JobComponent} />
               <Route component={NotFound} />
             </Switch>
           </>

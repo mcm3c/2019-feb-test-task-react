@@ -3,26 +3,42 @@ import { Link } from 'react-router-dom';
 import { Header } from '../header/header';
 import { AccessTime, DirectionsBike, BeachAccess, Room } from '@material-ui/icons';
 import Card from '@material-ui/core/Card';
-import CardHeader from '@material-ui/core/CardHeader';
-import CardContent from '@material-ui/core/CardContent';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import { requestJobs } from 'actions/asyncJobs/actionCreators';
+import { setLocation } from 'actions/location/actionCreators';
+import { connect } from 'react-redux';
 import './jobs.scss';
+import RootState from 'store/RootState';
+import { bindActionCreators } from 'redux';
+import { Location, Job } from 'actions/asyncJobs/actionTypes';
+import * as moment from 'moment';
+import { LOCATION_ALL } from 'reducers/location/reducers';
 
 interface JobsListProps {
+  locations: Location[];
+  selectedLocation: Number;
 }
 
 interface JobsListState {
 }
 
-export class JobsList extends React.Component<JobsListProps, JobsListState> {
-  constructor(props: JobsListProps) {
+class JobsList extends React.Component<JobsListProps & typeof dispatchProps, JobsListState> {
+
+  constructor(props: JobsListProps & typeof dispatchProps) {
     super(props);
   }
 
+  componentDidMount() {
+    this.props.requestJobs();
+  }
+
   render() {
+
+    console.log('this.state.locations', this.state);
+
     return (
       <div>
         <Header></Header>
@@ -67,43 +83,83 @@ export class JobsList extends React.Component<JobsListProps, JobsListState> {
             <div>
               Our Vacancies
             </div>
-            <Select defaultValue="all">
-              <MenuItem value="all">All locations</MenuItem>
-              <MenuItem value="3">Sydney</MenuItem>
-              <MenuItem value="4">Brisbane</MenuItem>
+            <Select
+              value={this.props.selectedLocation}
+              onChange={this.setLocation.bind(this)}
+            >
+              <MenuItem value={-1}>All locations</MenuItem>
+              {this.props.locations.map((location: Location) => {
+                return <MenuItem key={location.ID} value={location.ID}>{location.Name}</MenuItem>;
+              })}
             </Select>
           </Typography>
           <div>
 
-            <Card className="vacancy-card">
-              <div className="vacancy-card-content">
-                <div className="vacancy-card-header">
-                  <div className="vacancy-card-title">
-                    Test title
-                  </div>
-                  <div className="vacancy-card-location">
-                    Location
-                  </div>
-                </div>
-                <div className="vacancy-card-description">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </div>
-              </div>
-              <div className="vacancy-card-date">
-                <div className="vacancy-card-date-day">
-                  1
-                </div>
-                <div className="vacancy-card-date-month">
-                  February
-                </div>
-              </div>
+            {this.props.locations
+              .filter((location) => {
+                if (this.props.selectedLocation === LOCATION_ALL) {
+                  return true;
+                }
+                return this.props.selectedLocation === location.ID;
+              })
+              .map((location: Location) => {
+                return location.Jobs.map((job: Job) => {
+                  return <Link
+                    key={`${location.ID}-${job.ID}` }
+                    to={`/jobs/${job.ID}`}
+                    style={{ textDecoration: 'none' }}
+                    >
+                      <Card className="vacancy-card">
+                        <div className="vacancy-card-content">
+                          <div className="vacancy-card-header">
+                            <div className="vacancy-card-title">
+                              {job.Name}
+                            </div>
+                            <div className="vacancy-card-location">
+                              {location.Name}
+                            </div>
+                          </div>
+                          <div className="vacancy-card-description">
+                            {job.Description}
+                          </div>
+                        </div>
+                        <div className="vacancy-card-date">
+                          <div className="vacancy-card-date-day">
+                            {new Date(job.DateAdded).getDay()}
+                          </div>
+                          <div className="vacancy-card-date-month">
+                            {moment(new Date(job.DateAdded)).format('MMM')}
+                          </div>
+                        </div>
 
-            </Card>
+                      </Card>
+                    </Link>;
+                });
+              })}
+
           </div>
         </Paper>
 
-        {/* here should; be a l;ist; o;f job;s. ;<Link to ="/j;obs / 123">Go to  s in;gle; job.</; Link>; <Link  to="/somewhere">Go to error page.</Link> */}
       </div>
     ) ;
   }
+
+  setLocation(event: React.ChangeEvent<{ value: number; }>) {
+    this.props.setLocation(event.target.value);
+  }
 }
+
+const dispatchProps = {
+  requestJobs,
+  setLocation,
+};
+
+export default connect(
+  (state: RootState) => {
+    return {
+      locations: state.jobs.locations,
+      selectedLocation: state.location.locationId,
+    };
+  },
+  dispatch => bindActionCreators(dispatchProps, dispatch),
+)(JobsList);

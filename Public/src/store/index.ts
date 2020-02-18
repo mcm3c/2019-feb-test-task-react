@@ -1,4 +1,5 @@
 import { createStore, compose, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 import RootState from './RootState';
 import RootActions from 'actions';
 import reducers, { history } from 'reducers';
@@ -14,12 +15,13 @@ export function configureStore() {
     {}>(
     reducers,
     initialState,
-    // does it really needed?
-    // compose(
-    //   applyMiddleware(
-    //     routerMiddleware(history),
-    //   ),
-    // ),
+    compose(
+      applyMiddleware(
+        thunk,
+        // does it really needed?
+        // routerMiddleware(history),
+      ),
+    ),
   );
   return store;
 }
