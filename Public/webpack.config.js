@@ -7,7 +7,9 @@ module.exports = {
 
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".json"],
-    plugins: [new TsconfigPathsPlugin()]
+    plugins: [
+      new TsconfigPathsPlugin()
+    ]
   },
 
   module: {
@@ -25,6 +27,14 @@ module.exports = {
         enforce: "pre",
         test: /\.js$/,
         loader: "source-map-loader"
+      },
+      {
+        use: ["style-loader", "css-loader", "sass-loader"],
+        test: /\.(s?)css$/
+      },
+      {
+        test: /\.(jpe?g|gif|png|svg|woff|ttf|wav|mp3)$/,
+        loader: "file"
       }
     ]
   },
