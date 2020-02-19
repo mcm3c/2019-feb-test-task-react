@@ -1,65 +1,25 @@
 import {
   JobsAsyncActions,
-  JOBS_REQUESTED,
   JOBS_RECEIVED,
   JOBS_FAILED,
-  JOB_REQUESTED,
   JOB_RECEIVED,
-  JOB_FAILED,
-  Job,
 } from './actionTypes';
 import { ThunkAction } from 'redux-thunk';
 import RootState from 'store/RootState';
+import * as Config from 'config/environment.json';
+import { LOCATION_ALL } from 'reducers/location/reducers';
 
 export function requestJobs(locationId?: number)
   : ThunkAction<void, RootState, void, JobsAsyncActions> {
-  return (dispatch) => {
-
-    setTimeout(
-      () => {
-        dispatch(
-          receivedJobs({
-            locations: [
-              {
-                ID: 3,
-                Name: 'Sydney',
-                State: 'There',
-                Jobs: [
-                  {
-                    ID: 2,
-                    LocationID: 3,
-                    Name: 'Wow, job?',
-                    Description: 'Job description',
-                    DateAdded: new Date().getTime(),
-                  },
-                ],
-              },
-              {
-                ID: 4,
-                Name: 'Baltimore',
-                State: 'Here',
-                Jobs: [
-                  {
-                    ID: 3,
-                    LocationID: 4,
-                    Name: 'Wow, job!',
-                    Description: 'Another Job description',
-                    DateAdded: new Date().getTime(),
-                  },
-                ],
-              },
-            ],
-          }),
-        );
-      },
-      1000,
-    );
-    /* const jobsRequest = fetch('/api/jobs')
-      .then(response => response.json());
-
-    return jobsRequest.then(res => {
-      dispatch(receivedJobs(data));
-    }); */
+  return async (dispatch) => {
+    try {
+      const locationFilter = locationId && locationId !== LOCATION_ALL ? `($filter = LocationID eq ${locationId})` : '';
+      const jobsResponse = await fetch(`${Config.jobsApiUrl}Locations?$expand=Jobs${locationFilter}&$filter=Jobs/any()`);
+      const jobs = await jobsResponse.json();
+      dispatch(receivedJobs(jobs.value));
+    } catch (error) {
+      dispatch(failedJobs(error));
+    }
   };
 }
 
@@ -72,31 +32,14 @@ export function receivedJobs(data: any): JobsAsyncActions {
 
 export function requestJob(id: string):
   ThunkAction<void, RootState, void, JobsAsyncActions> {
-  return (dispatch) => {
-    setTimeout(
-      () => {
-        dispatch(
-          receivedJob({
-            ID: 2,
-            LocationID: 3,
-            Name: 'Wow, job?',
-            Description: 'Job description',
-            DateAdded: new Date().getTime(),
-          }),
-        );
-      },
-    );
-    /* fetch(`/api/posts/${id}`)
-      .then(res => res.json())
-      .then((res) => {
-        if (res.error) {
-          throw res.error;
-        }
-        dispatch(receivedPost(res));
-      })
-      .catch((error) => {
-        dispatch(failedPosts(error));
-      }); */
+  return async (dispatch) => {
+    try {
+      const jobsResponse = await fetch(`${Config.jobsApiUrl}Jobs?$filter=ID eq ${id}`);
+      const jobs = await jobsResponse.json();
+      dispatch(receivedJob(jobs.value ? jobs.value[0] : null));
+    } catch (error) {
+      dispatch(failedJobs(error));
+    }
   };
 }
 

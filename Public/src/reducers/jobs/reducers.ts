@@ -4,11 +4,11 @@ import {
   JOB_RECEIVED,
   Job,
   JobsAsyncActions,
-  Location,
+  JobLocation,
 } from 'actions/asyncJobs/actionTypes';
 
 export interface JobsState {
-  locations: Location[];
+  locations: JobLocation[];
   selectedJob: Job | null;
   error: string;
 }
@@ -16,16 +16,15 @@ export interface JobsState {
 const initialState = {
   locations: [],
   selectedJob: null,
-  error: 'oops',
+  error: null,
 } as JobsState;
 
 export function jobs(state = initialState, action: JobsAsyncActions): JobsState {
-  console.log(action);
   switch (action.type) {
     case JOBS_RECEIVED:
       return {
         ...state,
-        locations: [...action.data.locations],
+        locations: [...action.data],
       };
     case JOB_RECEIVED:
       return { ...state, selectedJob: action.job };

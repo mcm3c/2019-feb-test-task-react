@@ -14,6 +14,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 interface JobProps {
   id: string;
   selectedJob: Job;
+  error:string;
 }
 
 interface JobState {
@@ -29,6 +30,13 @@ class JobComponent extends React.Component<JobProps & typeof dispatchProps, JobS
   }
 
   render() {
+
+    if (this.props.error) {
+      // nice error message here
+      console.log(this.props.error);
+      alert('Something went wrong, try again later :(');
+    }
+
     return (
       <div>
         <Header></Header>
@@ -43,7 +51,9 @@ class JobComponent extends React.Component<JobProps & typeof dispatchProps, JobS
         <Typography variant="h3" component="h3">
           {this.props.selectedJob.Name}
         </Typography>
-        <div className="vacancy-date">{moment(new Date(this.props.selectedJob.DateAdded)).format('DD/MM/YYYY')}</div>
+        <div className="vacancy-date">
+          {moment(this.props.selectedJob.DateAdded).format('DD/MM/YYYY')}
+        </div>
         <Typography component="p">
           {this.props.selectedJob.Description}
         </Typography>
@@ -63,6 +73,7 @@ export default connect(
     return {
       id: props.match.params.id as string,
       selectedJob: state.jobs.selectedJob,
+      error: state.jobs.error,
     };
   },
   dispatch => bindActionCreators(dispatchProps, dispatch),

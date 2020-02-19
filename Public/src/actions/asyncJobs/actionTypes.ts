@@ -7,7 +7,7 @@ export const JOB_REQUESTED = 'JOBS_REQUESTED';
 export const JOB_RECEIVED = 'JOB_RECEIVED';
 export const JOB_FAILED = 'JOBS_FAILED';
 
-export interface Location {
+export interface JobLocation {
   ID: number;
   Name: string;
   State: string;
@@ -19,13 +19,11 @@ export interface Job {
   Name: string;
   LocationID: number;
   Description: string;
-  DateAdded: number;
+  DateAdded: string;
 }
 
 export interface JobsReceived extends Action<typeof JOBS_RECEIVED> {
-  data: {
-    locations: Location[];
-  };
+  data: JobLocation[];
 }
 export interface JobsRequested extends Action<typeof JOBS_REQUESTED> { }
 export interface JobsFailed extends Action<typeof JOBS_FAILED> {

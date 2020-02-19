@@ -13,13 +13,13 @@ import { connect } from 'react-redux';
 import './jobs.scss';
 import RootState from 'store/RootState';
 import { bindActionCreators } from 'redux';
-import { Location, Job } from 'actions/asyncJobs/actionTypes';
+import { JobLocation, Job } from 'actions/asyncJobs/actionTypes';
 import * as moment from 'moment';
-import { LOCATION_ALL } from 'reducers/location/reducers';
 
 interface JobsListProps {
-  locations: Location[];
-  selectedLocation: Number;
+  locations: JobLocation[];
+  selectedLocation: number;
+  error: string;
 }
 
 interface JobsListState {
@@ -32,12 +32,16 @@ class JobsList extends React.Component<JobsListProps & typeof dispatchProps, Job
   }
 
   componentDidMount() {
-    this.props.requestJobs();
+    this.props.requestJobs(this.props.selectedLocation);
   }
 
   render() {
 
-    console.log('this.state.locations', this.state);
+    if (this.props.error) {
+      // nice error message here
+      console.log(this.props.error);
+      alert('Something went wrong, try again later :(');
+    }
 
     return (
       <div>
@@ -88,54 +92,51 @@ class JobsList extends React.Component<JobsListProps & typeof dispatchProps, Job
               onChange={this.setLocation.bind(this)}
             >
               <MenuItem value={-1}>All locations</MenuItem>
-              {this.props.locations.map((location: Location) => {
+              {this.props.locations.map((location: JobLocation) => {
                 return <MenuItem key={location.ID} value={location.ID}>{location.Name}</MenuItem>;
               })}
             </Select>
           </Typography>
           <div>
 
-            {this.props.locations
-              .filter((location) => {
-                if (this.props.selectedLocation === LOCATION_ALL) {
-                  return true;
-                }
-                return this.props.selectedLocation === location.ID;
-              })
-              .map((location: Location) => {
-                return location.Jobs.map((job: Job) => {
-                  return <Link
-                    key={`${location.ID}-${job.ID}` }
-                    to={`/jobs/${job.ID}`}
-                    style={{ textDecoration: 'none' }}
-                    >
-                      <Card className="vacancy-card">
-                        <div className="vacancy-card-content">
-                          <div className="vacancy-card-header">
-                            <div className="vacancy-card-title">
-                              {job.Name}
-                            </div>
-                            <div className="vacancy-card-location">
-                              {location.Name}
-                            </div>
+            {this.props.locations.map((location: JobLocation) => {
+              return location.Jobs.map((job: Job) => {
+                return <Link
+                  key={`${location.ID}-${job.ID}` }
+                  to={`/jobs/${job.ID}`}
+                  style={{ textDecoration: 'none' }}
+                  >
+                    <Card className="vacancy-card">
+                      <div className="vacancy-card-content">
+                        <div className="vacancy-card-header">
+                          <div className="vacancy-card-title">
+                            {job.Name}
                           </div>
-                          <div className="vacancy-card-description">
-                            {job.Description}
+                          <div className="vacancy-card-location">
+                            {location.Name}
                           </div>
                         </div>
-                        <div className="vacancy-card-date">
-                          <div className="vacancy-card-date-day">
-                            {new Date(job.DateAdded).getDay()}
-                          </div>
-                          <div className="vacancy-card-date-month">
-                            {moment(new Date(job.DateAdded)).format('MMM')}
-                          </div>
+                        <div className="vacancy-card-description">
+                          {
+                            job.Description.length > 130 ?
+                              `${job.Description.substring(0, 130)}...` :
+                              job.Description
+                          }
                         </div>
+                      </div>
+                      <div className="vacancy-card-date">
+                        <div className="vacancy-card-date-day">
+                          {moment(job.DateAdded).format('DD')}
+                        </div>
+                        <div className="vacancy-card-date-month">
+                          {moment(job.DateAdded).format('MMM')}
+                        </div>
+                      </div>
 
-                      </Card>
-                    </Link>;
-                });
-              })}
+                    </Card>
+                  </Link>;
+              });
+            })}
 
           </div>
         </Paper>
@@ -146,6 +147,7 @@ class JobsList extends React.Component<JobsListProps & typeof dispatchProps, Job
 
   setLocation(event: React.ChangeEvent<{ value: number; }>) {
     this.props.setLocation(event.target.value);
+    this.props.requestJobs(event.target.value);
   }
 }
 
@@ -159,6 +161,7 @@ export default connect(
     return {
       locations: state.jobs.locations,
       selectedLocation: state.location.locationId,
+      error: state.jobs.error,
     };
   },
   dispatch => bindActionCreators(dispatchProps, dispatch),

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import { History } from 'history';
 import { ConnectedRouter } from 'connected-react-router';
 import { Provider } from 'react-redux';
@@ -25,16 +25,10 @@ export class App extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.state = { test: false };
     this.store = configureStore();
   }
 
   render() {
-    if (this.state.test) {
-      return 'test!';
-    }
-    console.log(123);
-
     return (
       <Provider store={this.store}>
         <ConnectedRouter history={history}>
@@ -55,4 +49,4 @@ export class App extends React.Component<AppProps, AppState> {
 }
 
 const domContainer = document.querySelector('#app-root');
-ReactDOM.render(React.createElement(App), domContainer);
+render(React.createElement(App), domContainer);
