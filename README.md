@@ -35,6 +35,7 @@ A Company is revamping their Careers page to attract new employees and allow pro
 * Material UI - To avoid reimplementing a UI kit on my own.
 * "Back button and filters" - There are two ways to implement it: first one is just a side effect of using react-dom-router which uses History API underneath and Redux, so when a use clicks the back button, the page is not reloaded and the state is taken from Redux, meaning that the filters remain the same. And sure the second option is explicitly storing the state in the local storage, although it's a bit an overkill from my perspective.
 * Filter on the server side - Using OData is quite a trick here because I don't have to implement specific filters on the backend side (and I wouldn't want to implement them in real production myself because it's fragile, insecure, and not that well tested as ready solutions) so I just enable OData there and manipulate the filters from the frontend.
+* Responsive - The heavy lifting is mostly done by flexbox and although all the sizes set in pixels the pages correspond the mockup (except for the job page which I didn't have a mockup for).
 
 
 ## Useful commands
